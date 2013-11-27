@@ -97,3 +97,50 @@ describe('test-size', function() {
     assert.equal(db.size(), 3);
   });
 });
+
+describe('test-clean', function() {
+  describe('w/o file', function () {
+    var db = dirty();
+
+    db.set(1, {test: 'foo'});
+    db.set(2, {test: 'bar'});
+    db.set(3, {test: 'foobar'});
+    db.rm(2);
+
+    db.clean();
+
+    it('should make key set empty', function() {
+      assert.equal(db.size(), 0);
+    });
+  });
+  describe('w/ file', function () {
+    var file = config.TMP_PATH + '/flush.dirty';
+
+    after(function() {
+      try {
+        fs.unlinkSync(file);
+      } catch (e) {
+        /* handle error */
+      }
+    });
+    var db = dirty(file);
+
+    db.set(1, {test: 'foo'});
+    db.set(2, {test: 'bar'});
+    db.set(3, {test: 'foobar'});
+    db.rm(2);
+
+    db.clean();
+
+    it('should make key set empty', function() {
+      assert.equal(db.size(), 0);
+    });
+    it('should add/remove keys', function() {
+      db.set(1, {test: 'foo'});
+      db.set(2, {test: 'bar'});
+      db.set(3, {test: 'foobar'});
+      db.rm(2);
+      assert.equal(db.size(), 2);
+    });
+  });
+});
